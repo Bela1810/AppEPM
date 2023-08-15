@@ -185,11 +185,15 @@ namespace EpmApp
            
             while (true)
             {
+                Console.WriteLine("-------------------------------------------------------------------------");
+                Console.WriteLine("BIENVENIDO AL SISTEMA INCENTIVO AL AHORRO EN EL CONSUMO DE ENERGÍA DE EPM");
+                Console.WriteLine("-------------------------------------------------------------------------");
                 Console.WriteLine("Seleccione una opcion: ");
                 Console.WriteLine("1. Agregar un cliente");
                 Console.WriteLine("2. Valor a Pagar por el servicio de energía");
                 Console.WriteLine("3. Valor total por concepto de descuentos");
                 Console.WriteLine("4. Mostrar Porcentajes de Ahorro por estrato");
+                Console.WriteLine("-------------------------------------------------------------------------");
 
                 int opcion = int.Parse(Console.ReadLine());
 
