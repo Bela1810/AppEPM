@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Runtime.CompilerServices;
@@ -24,9 +24,7 @@ namespace EpmApp
         public void ImprimirDatosCliente()
         {
             Console.WriteLine($"La cedula del cliente: {this.NombreCliente} es {this.ClienteCedulaCiudadania}, con estrato {this.ClienteEstrato} y su consumo mensual es {this.ClienteConsumoMes}");
-        }
-
-       
+        }    
 
     }
 
@@ -72,7 +70,6 @@ namespace EpmApp
 
             return false; // Si no se encuentra ninguna coincidencia en toda la lista, se retorna false.
         }
-
 
         public float CalcularMetaAhorro(Cliente cliente)
         {
@@ -221,7 +218,9 @@ namespace EpmApp
                 Console.WriteLine("6. Porcentajes de ahorro por estrato");
                 Console.WriteLine("7. Numero de clientes que tuvieron cobro adicional y superaron su meta");
 
-          
+                Console.WriteLine("------------------------------------------------------------------------ ");
+
+
                 int opcion = int.Parse(Console.ReadLine());
 
 
@@ -248,12 +247,43 @@ namespace EpmApp
                         clienteNuevo.ImprimirDatosCliente();
                         float metaCliente = epm.CalcularMetaAhorro(clienteNuevo);
                         Console.WriteLine($"Meta de Ahorro del cliente {metaCliente}");
-                                        
-                                        
+                        float parcialCliente = epm.CalcularPrecioParcial(clienteNuevo);
+                        Console.WriteLine($"Precio Parcial {parcialCliente}");
+                        float incentivoCliente = epm.CalcularPrecioIncentivo(clienteNuevo);
+                        Console.WriteLine($"Precio Incentivo {incentivoCliente}"); 
+                                                                 
                         break;
 
                     case 2:
-                        Console.WriteLine("");
+                        Console.WriteLine("Por favor ingrese la cedula del cliente para verficar que si existan sus datos.: ");
+                        int verificarCedula = int.Parse(Console.ReadLine());
+                        epm.VerificarExistenciaCliente(verificarCedula);
+                                           
+                        break;
+
+                    case 3:
+                        Console.WriteLine($"El valor a pagar por el servicio de energía es: {epm.CalcularValorPagar}");
+
+                        break;
+
+                    case 4:
+                        Console.WriteLine($"El promedio del consumo actual de energía es: {epm.CalcularPromedioConsumo}");
+
+                        break;
+
+                    case 5:
+                        Console.WriteLine($" El valor total por concepto de descuentos a causa del incentivo es: {epm.CalcularTotalDescuentos}");
+
+                        break;
+
+                    case 6:
+                        Console.WriteLine($"Porcentajes de ahorro por estrato {epm.MostrarPorcentajesAhorroPorEstrato}");
+
+                        break;
+
+                    case 7:
+                        Console.WriteLine($"Numero total de clientes que tuvieron un cobro adicional: {epm.ContabilizarCobrosAdicionales}");
+
                         break;
 
                     default:
