@@ -24,20 +24,19 @@ namespace EpmApp
         public void ImprimirDatosCliente()
         {
             Console.WriteLine($"La cedula del cliente: {this.NombreCliente} es {this.ClienteCedulaCiudadania}, con estrato {this.ClienteEstrato} y su consumo mensual es {this.ClienteConsumoMes}");
-        }    
+        }
 
     }
 
     public class Epm
     {
-        public float PrecioAnteriorKilovatioHora { get; set; }
         public float PrecioActualKilovatioHora { get; set; }
         public float MetaAhorro { get; set; }
         public Dictionary<int, float> FactorEstrato { get; set; } = new Dictionary<int, float>();
         public List<Cliente> ListaClientes { get; set; } = new List<Cliente>();
 
 
-        public Epm(float precioAnteriorKilovatioHora, float precioActualKilovatioHora)
+        public Epm(float precioActualKilovatioHora)
         {
 
             FactorEstrato[1] = 0.5f;
@@ -48,7 +47,7 @@ namespace EpmApp
             FactorEstrato[6] = 1.4f;
 
             this.PrecioActualKilovatioHora = precioActualKilovatioHora;
-            this.PrecioAnteriorKilovatioHora = precioAnteriorKilovatioHora;
+           
         }
 
 
@@ -93,21 +92,14 @@ namespace EpmApp
         }
 
 
-        public float CalcularValorPagar(Cliente cliente)
+        public float CalcularValorPagar(Cliente cliente, float metaAhorroCliente)
         {
             float precioParcial = CalcularPrecioParcial(cliente);
-            float precioIncentivo = CalcularPrecioIncentivo(cliente);
-
-            if (precioIncentivo < 0)
-            {
-                float precioTotal = precioParcial + precioIncentivo;
-                return precioTotal;
-            }
-            else
-            {
-                float precioTotal = precioParcial - precioIncentivo;
-                return precioTotal;
-            }
+            float precioIncentivo = CalcularPrecioIncentivo(cliente);       
+            
+            float precioTotal = precioParcial - precioIncentivo;
+            return precioTotal;
+            
         }
 
         public float CalcularPromedioConsumo()
@@ -137,12 +129,12 @@ namespace EpmApp
         public void MostrarPorcentajesAhorroPorEstrato()
         {
             Dictionary<int, float> ahorroPorEstrato = new Dictionary<int, float>();
-
+            float totalDescuentos = 0;
             foreach (var cliente in ListaClientes)
             {
                 int estrato = cliente.ClienteEstrato;
                 float ahorro = CalcularPrecioIncentivo(cliente);
-
+                totalDescuentos += ahorro;
                 if (!ahorroPorEstrato.ContainsKey(estrato))
                 {
                     ahorroPorEstrato[estrato] = 0;
@@ -155,8 +147,9 @@ namespace EpmApp
             {
                 int estrato = kvp.Key;
                 float totalAhorro = kvp.Value;
+                float porcentajeAhorro = (totalDescuentos / totalAhorro);
 
-                Console.WriteLine($"Estrato {estrato}: Porcentaje de ahorro = {totalAhorro * 0.1 / CalcularTotalDescuentos():0.2}%");
+                Console.WriteLine($"Estrato {estrato}: Porcentaje de ahorro = {porcentajeAhorro:0.2}%");
             }
         }
 
@@ -171,7 +164,7 @@ namespace EpmApp
 
                 if (consumoActual > metaAhorro)
                 {
-                    clientesConCobroAdicional++; 
+                    clientesConCobroAdicional++;
                 }
             }
 
@@ -179,7 +172,7 @@ namespace EpmApp
         }
 
     }
-    
+
     public class Menu
     {
         public Epm epm;
@@ -198,12 +191,11 @@ namespace EpmApp
 
             Console.WriteLine("Ingrese el precio actual de kilovaltio hora: ");
             float kilovaltioActual = float.Parse(Console.ReadLine());
-            Console.WriteLine("Ingrese el precio anterior de kilovaltio hora: ");
-            float kilovaltioAnterior = float.Parse(Console.ReadLine());
+            
 
-            Epm epm = new Epm(kilovaltioAnterior, kilovaltioActual);
+            Epm epm = new Epm(kilovaltioActual);
 
-        
+
             while (true)
             {
 
@@ -224,11 +216,11 @@ namespace EpmApp
                 int opcion = int.Parse(Console.ReadLine());
 
 
-                switch(opcion)
+                switch (opcion)
 
                 {
                     case 1:
-                        Console.WriteLine("Ingrese los datos del ciente");
+                        Console.WriteLine("Ingrese los datos del cliente");
 
                         Console.WriteLine("Nombre del cliente: ");
                         string nombreCliente = Console.ReadLine();
@@ -242,60 +234,66 @@ namespace EpmApp
                         Console.WriteLine("Ingrese el Estrato del cliente: ");
                         int estratoCliente = int.Parse(Console.ReadLine());
 
-                        Cliente clienteNuevo = new Cliente(nombreCliente, clienteCedulaCiudadania, consumoMes, estratoCliente);
-                        epm.AgregarCliente(clienteNuevo);
-                        clienteNuevo.ImprimirDatosCliente();
-                        float metaCliente = epm.CalcularMetaAhorro(clienteNuevo);
-                        Console.WriteLine($"Meta de Ahorro del cliente {metaCliente}");
-                        float parcialCliente = epm.CalcularPrecioParcial(clienteNuevo);
-                        Console.WriteLine($"Precio Parcial {parcialCliente}");
-                        float incentivoCliente = epm.CalcularPrecioIncentivo(clienteNuevo);
-                        Console.WriteLine($"Precio Incentivo {incentivoCliente}"); 
-                                                                 
+                        Cliente nuevoCliente = new Cliente(nombreCliente, clienteCedulaCiudadania, consumoMes, estratoCliente);
+                        epm.AgregarCliente(nuevoCliente);
+                     
+
                         break;
 
                     case 2:
-                        Console.WriteLine("Por favor ingrese la cedula del cliente para verficar que si existan sus datos.: ");
+                        Console.WriteLine("Por favor ingrese la cédula del cliente para verificar si existen sus datos: ");
                         int verificarCedula = int.Parse(Console.ReadLine());
-                        epm.VerificarExistenciaCliente(verificarCedula);
-                                           
+                        bool existeCliente = epm.VerificarExistenciaCliente(verificarCedula);
+                        Console.WriteLine($"El cliente {(existeCliente ? "sí" : "no")} existe en la lista.");
+
                         break;
 
                     case 3:
-                        Console.WriteLine($"El valor a pagar por el servicio de energía es: {epm.CalcularValorPagar}");
-
+                        Console.WriteLine("Ingrese la cédula del cliente para calcular el valor a pagar: ");
+                        int cedulaCalcularValor = int.Parse(Console.ReadLine());
+                        Cliente clienteCalcularValor = epm.ListaClientes.Find(cliente => cliente.ClienteCedulaCiudadania == cedulaCalcularValor);
+                        if (clienteCalcularValor != null)
+                        {
+                            float metaAhorro = epm.CalcularMetaAhorro(clienteCalcularValor);
+                            Console.WriteLine($"Meta de Ahorro: {metaAhorro}");                           // Calcular la meta de ahorro específica para este cliente
+                            float valorAPagar = epm.CalcularValorPagar(clienteCalcularValor, metaAhorro); // Pasar la meta de ahorro calculada como argumento
+                            Console.WriteLine($"El valor a pagar por el servicio de energía es: {valorAPagar}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("El cliente no existe.");
+                        }
                         break;
 
                     case 4:
-                        Console.WriteLine($"El promedio del consumo actual de energía es: {epm.CalcularPromedioConsumo}");
+                        float promedioConsumo = epm.CalcularPromedioConsumo();
+                        Console.WriteLine($"El promedio del consumo actual de energía es: {promedioConsumo}");
 
                         break;
 
                     case 5:
-                        Console.WriteLine($" El valor total por concepto de descuentos a causa del incentivo es: {epm.CalcularTotalDescuentos}");
+                        float totalDescuentos = epm.CalcularTotalDescuentos();
+                        Console.WriteLine($"El valor total por concepto de descuentos a causa del incentivo es: {totalDescuentos}");
 
                         break;
 
                     case 6:
-                        Console.WriteLine($"Porcentajes de ahorro por estrato {epm.MostrarPorcentajesAhorroPorEstrato}");
+                        epm.MostrarPorcentajesAhorroPorEstrato();
 
                         break;
 
                     case 7:
-                        Console.WriteLine($"Numero total de clientes que tuvieron un cobro adicional: {epm.ContabilizarCobrosAdicionales}");
+                        Console.WriteLine($"Número total de clientes que tuvieron un cobro adicional: {epm.ContabilizarCobrosAdicionales(epm.ListaClientes[0])}");
 
                         break;
 
                     default:
-
-                        Console.WriteLine("Seleccione una opción valida");
-                        break; 
-                       
+                        Console.WriteLine("Seleccione una opción válida");
+                        break;
                 }
             }
         }
 
     }
-   
+
 }
-        
